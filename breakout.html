@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breakout</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    
+
+    <script>
+        let keys = []
+        canvasElem = {
+            x: 0,
+            y: 0,
+            width: 800,
+            height: 800,
+            rows: 4,
+            cols: 8,
+        }
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        document.body.appendChild(canvas);
+        canvas.width = canvasElem.width;
+        canvas.height = canvasElem.height;
+    
+        document.addEventListener('keydown', (e) => {
+            keys[e.keyCode] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.keyCode] = false;
+        });
+
+        ball = {
+            x: canvasElem.width / 2,
+            y: canvasElem.height / 2,
+            radius: 10,
+            speedX: 7,
+            speedY: 7,
+            color: '#0095DD',
+        }
+
+        
+
+        paddle = {
+            x: canvasElem.width / 2 - 50,
+            y: canvasElem.height - 20,
+            width: 100,
+            height: 10,
+            speed: 10,
+            color: '#0095DD',
+        }   
+
+        block = {
+            x: 0,
+            y: 0,
+            width: 80,
+            height: 20,
+            color: '#0095DD',
+        }
+
+        let blocks = [];
+        
+
+
+        function drawPaddle(){
+            ctx.beginPath();
+            ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+            fillStyle = paddle.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawBall(){
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+            
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function initBlocks() {
+            for (var i = 0; i < canvasElem.cols; i++) {
+                blocks[i] = []; 
+                for (var j = 0; j < canvasElem.rows; j++) {
+                    blocks[i][j] = {
+                        x: i * (block.width + 10) + 10,
+                        y: j * (block.height + 10) + 10, 
+                        width: block.width,
+                        height: block.height,
+                        color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+                    };
+                }
+            }
+        }
+        function drawBlocks() {
+            for (var i = 0; i < canvasElem.cols; i++) {
+                for (var j = 0; j < canvasElem.rows; j++) {
+                    let b = blocks[i][j];
+                    if (b) { 
+                        ctx.beginPath();
+                        ctx.rect(b.x, b.y, b.width, b.height);
+                        ctx.fillStyle = b.color;
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+            }
+        }
+
+
+
+
+        function checkKey(){
+            if (keys[37] && paddle.x > 0) {
+                paddle.x -= paddle.speed;
+            }
+            if (keys[39] && paddle.x < canvasElem.width - paddle.width) {
+                paddle.x += paddle.speed;
+            }
+        }
+
+        function updateBall() {
+            ball.x += ball.speedX;
+            ball.y += ball.speedY;
+
+            if (ball.x + ball.radius > canvasElem.width || ball.x - ball.radius < 0) {
+                ball.speedX = -ball.speedX; 
+            }
+            if (ball.y + ball.radius > canvasElem.height || ball.y - ball.radius < 0) {
+                ball.speedY = -ball.speedY; 
+            }
+            if (ball.x > paddle.x && ball.x < paddle.x + paddle.width && ball.y + ball.radius > paddle.y) {
+                ball.y = paddle.y - ball.radius;
+                let hitPosition = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+
+                let speed = Math.sqrt(ball.speedX ** 2 + ball.speedY ** 2); 
+                ball.speedX = hitPosition * speed; 
+                ball.speedY = -Math.abs(Math.sqrt(speed ** 2 - ball.speedX ** 2)); 
+            }
+
+            for (let i = 0; i < canvasElem.cols; i++) {
+                for (let j = 0; j < canvasElem.rows; j++) {
+                    let block = blocks[i][j];
+                    if (block && isBallCollidingWithBlock(ball, block)) {
+                        handleBlockCollision(ball, block, i, j);
+                    }
+                }
+            }
+        }
+
+        function handleBlockCollision(ball, block, i, j) {
+            let collidedFromTopOrBottom = false;
+            let collidedFromLeftOrRight = false;
+
+            
+            let penetrationX = Math.min(
+                Math.abs(ball.x + ball.radius - block.x), 
+                Math.abs(ball.x - ball.radius - (block.x + block.width))
+            );
+            
+            let penetrationY = Math.min(
+                Math.abs(ball.y + ball.radius - block.y), 
+                Math.abs(ball.y - ball.radius - (block.y + block.height))
+            );
+
+            
+            if (
+                ball.x + ball.radius > block.x &&
+                ball.x - ball.radius < block.x + block.width &&
+                ball.y + ball.radius > block.y &&
+                ball.y - ball.radius < block.y + block.height
+            ) {
+            
+                if (penetrationX < penetrationY) {
+                    collidedFromLeftOrRight = true;
+                } else {
+                    collidedFromTopOrBottom = true;
+                }
+            }
+
+            
+            if (collidedFromTopOrBottom) {
+                ball.speedY = -ball.speedY;
+            }
+            if (collidedFromLeftOrRight) {
+                ball.speedX = -ball.speedX;
+            }
+
+            
+            blocks[i].splice(j, 1);
+            console.log("Block hit:", block);
+        }
+
+        function isBallCollidingWithBlock(ball, block) {
+            
+            if (ball.x + ball.radius > block.x && 
+                ball.x - ball.radius < block.x + block.width &&
+                ball.y + ball.radius > block.y &&
+                ball.y - ball.radius < block.y + block.height) {
+                return true; 
+            }
+            return false; 
+        }
+
+
+
+        function gameLoop(){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            updateBall();
+            drawBall();
+            drawBlocks();
+            checkKey();
+            drawPaddle();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        initBlocks();
+        gameLoop();
+
+    </script>
+</body>
+</html>
