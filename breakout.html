@@ -8,10 +8,26 @@
         canvas {
             border: 1px solid black;
         }
+        #gameover {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            color: red;
+        }
     </style>
 </head>
 <body>
-    
+    <div class="container" id="container">
+        <h2 id="gameover">Game Over</h2>
+    </div>
+    <div class="info">
+        
+        <h1 id="score">Score: 0</h1>
+        <button onclick="resetGame()">Reset</button>
+    </div>
 
     <script>
         let keys = []
@@ -24,9 +40,11 @@
             cols: 8,
         }
 
+        let score = 0;
+
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        document.body.appendChild(canvas);
+        document.getElementById("container").appendChild(canvas);
         canvas.width = canvasElem.width;
         canvas.height = canvasElem.height;
     
@@ -116,6 +134,10 @@
             }
         }
 
+        function resetGame(){
+            location.reload();
+        }
+
 
 
 
@@ -145,6 +167,13 @@
                 let speed = Math.sqrt(ball.speedX ** 2 + ball.speedY ** 2); 
                 ball.speedX = hitPosition * speed; 
                 ball.speedY = -Math.abs(Math.sqrt(speed ** 2 - ball.speedX ** 2)); 
+            }
+            if(ball.y > paddle.y){
+                document.getElementById("gameover").style.display = "block";
+                ball.radius = 0;
+                ball.speedX = 0;
+                ball.speedY = 0;
+            
             }
 
             for (let i = 0; i < canvasElem.cols; i++) {
@@ -198,6 +227,7 @@
             
             blocks[i].splice(j, 1);
             console.log("Block hit:", block);
+            score ++;
         }
 
         function isBallCollidingWithBlock(ball, block) {
@@ -211,6 +241,10 @@
             return false; 
         }
 
+        function updateScore(){
+            document.getElementById("score").innerHTML = "Score: " + score;
+        }
+
 
 
         function gameLoop(){
@@ -220,7 +254,8 @@
             drawBlocks();
             checkKey();
             drawPaddle();
-            
+            updateScore();
+
             requestAnimationFrame(gameLoop);
         }
         initBlocks();
