@@ -68,6 +68,7 @@
 
         let score = 0;
         let gameRunning = true;
+        let items = [];
 
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) {
@@ -123,6 +124,8 @@
             color: '#0095DD',
         }
 
+        
+
         let blocks = [];
         
 
@@ -143,6 +146,38 @@
             ctx.fill();
             ctx.closePath();
         }
+
+        function drawItems() {
+            for (let i = 0; i < items.length; i++) {
+                ctx.beginPath();
+                ctx.arc(items[i].x, items[i].y, items[i].radius, 0, Math.PI * 2);
+                ctx.fillStyle = items[i].color;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+
+        function updateItems() {
+            for (let i = 0; i < items.length; i++) {
+                items[i].y += items[i].speedY;
+            }
+        }
+
+
+    function spawnItem(x, y){
+        if(Math.floor(Math.random()*2) == 0){
+            let item = {
+                x: x+block.width/2,
+                y: y,
+                radius: 7,
+                color: 'yellow',
+                speedY: 2,
+                speedX: 0,
+            }
+            items.push(item);
+        }
+    }
 
         function initBlocks() {
             for (var i = 0; i < canvasElem.cols; i++) {
@@ -219,6 +254,8 @@
                 for (let j = 0; j < canvasElem.rows; j++) {
                     let block = blocks[i][j];
                     if (block && isBallCollidingWithBlock(ball, block)) {
+                        
+                        spawnItem(block.x, block.y);
                         handleBlockCollision(ball, block, i, j);
                     }
                 }
@@ -292,6 +329,9 @@
             updateBall();
             drawBall();
             drawBlocks();
+            
+            updateItems();
+            drawItems();
             checkKey();
             drawPaddle();
             updateScore();
