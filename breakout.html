@@ -52,6 +52,12 @@
     </div>
     <div class="right">
         <h1 id="score">Score: 0</h1>
+        <div class="highscores">
+            <h2>Highscores</h2>
+            <p>1. name 100p</p>
+            <p>2. name 100p</p>
+            <p>3. name 100p</p>
+        </div>
         <button onclick="resetGame()">Reset</button>
     </div>
 
@@ -100,7 +106,7 @@
             x: canvasElem.width / 2,
             y: canvasElem.height / 2,
             radius: 10,
-            speedX: 7,
+            speedX: 0,
             speedY: 7,
             color: '#0095DD',
         }
@@ -162,7 +168,16 @@
             for (let i = 0; i < items.length; i++) {
                 items[i].y += items[i].speedY;
             }
+            for (let i = 0; i < items.length; i++) {
+
+                if (items[i].x + items[i].radius > paddle.x && items[i].x - items[i].radius < paddle.x + paddle.width && items[i].y + items[i].radius > paddle.y && items[i].y - items[i].radius < paddle.y + paddle.height) {
+                    items.splice(i, 1);
+                    score += 3;
+                    break;
+                }
+            }
         }
+    
 
 
     function spawnItem(x, y){
