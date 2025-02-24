@@ -60,8 +60,11 @@
             rows: 5,
             cols: 8,
             running: true,
-            score: 0
+            score: 0,
+            blockleft: 0
         };
+
+        game.blockleft = game.rows * game.cols;
 
         canvas.width = game.width;
         canvas.height = game.height;
@@ -79,7 +82,7 @@
             x: game.width / 2,
             y: game.height / 2,
             radius: 10,
-            speedX: 4,
+            speedX: -0,
             speedY: -6,
             color: '#0095DD'
         };
@@ -159,6 +162,7 @@
                         blocks[i][j] = null;
                         game.score += 10;
                         document.getElementById('score').innerText = `Score: ${game.score}`;
+                        game.blockleft -= 1;
                         return;
                     }
                 }
@@ -184,6 +188,21 @@
             location.reload();
         }
 
+        function checkBlocksLeft() {
+            if(game.blockleft === 0) {
+                initBlocks();
+                game.blockleft = game.rows*game.cols;
+                ball.x = game.width / 2;
+                ball.y = game.height / 2;
+                ball.speedX = -0;
+                ball.speedY = ball.speedY * 1.5;
+                paddle.x = game.width / 2;
+                paddle.y = game.height - 20;
+                game.score += 100;
+                document.getElementById('score').innerText = `Score: ${game.score}`;
+            }
+        }
+
         function gameLoop() {
             if (!game.running) return;
 
@@ -193,6 +212,7 @@
             drawBlocks();
             movePaddle();
             updateBall();
+            checkBlocksLeft();
 
             requestAnimationFrame(gameLoop);
         }
