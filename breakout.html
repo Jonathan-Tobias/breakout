@@ -32,7 +32,7 @@
         #gameover {
             display: none;
             font-size: 50px;
-            color: darkmagenta;
+            color: red;
             position: absolute;
             top: -500%;
             left: 50%;
@@ -152,8 +152,8 @@
                 blocks[i] = [];
                 for (let j = 0; j < game.rows; j++) {
                     blocks[i][j] = {
-                        x: i * (blockWidth + 10) + 10,
-                        y: j * (blockHeight + 10) + 10,
+                        x: i * (blockWidth + 10) + 50,
+                        y: j * (blockHeight + 10) + 50,
                         width: blockWidth,
                         height: blockHeight,
                         color: 'darkmagenta'
