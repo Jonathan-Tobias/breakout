@@ -44,15 +44,17 @@
     <div class="right">
         <h1 id="score">Score: 0</h1>
         <h2>Highscores</h2>
-        <p>1. Player 100p</p>
-        <p>2. Player 90p</p>
-        <p>3. Player 80p</p>
+        <p id="score1">1. Player 100p</p>
+        <p id="score2">2. Player 90p</p>
+        <p id="score3">3. Player 80p</p>
         <button onclick="resetGame()">Reset</button>
     </div>
     <script>
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         document.body.appendChild(canvas);
+        let Highscores = [0, 0, 0, 0];
+        let HigscoreNames = ["test", "test2", "test3", "test4"];
         
         const game = {
             width: 800,
@@ -171,6 +173,8 @@
             // Game Over
             if (ball.y > game.height) {
                 game.running = false;
+                Highscores.push(game.score);
+                updateHighscores();
                 document.getElementById('gameover').style.display = 'block';
             }
         }
@@ -185,8 +189,37 @@
         document.addEventListener('keyup', (e) => keys[e.key] = false);
 
         function resetGame() {
-            location.reload();
+            game.score = 0;
+            game.blockleft = game.rows * game.cols;
+            game.running = true;
+            document.getElementById('gameover').style.display = 'none';
+            document.getElementById('score').innerText = `Score: ${game.score}`;
+            
+            ball.x = game.width / 2;
+            ball.y = game.height / 2;
+            ball.speedX = -0;
+            ball.speedY = -6;
+
+            paddle.x = game.width / 2 - paddle.width / 2;
+
+            initBlocks();
+
+            
+            requestAnimationFrame(gameLoop);
         }
+
+
+        function updateHighscores() {
+            Highscores.sort((a, b) => b - a);
+            Highscores = Highscores.slice(0, 3); 
+
+            for (let i = 0; i < Highscores.length; i++) {
+                if (document.getElementById('score' + (i+1))) { 
+                    document.getElementById('score' + (i+1)).innerText = `${i + 1}. Player ${Highscores[i]}p`;
+                }
+            }
+        }
+
 
         function checkBlocksLeft() {
             if(game.blockleft === 0) {
@@ -213,6 +246,7 @@
             movePaddle();
             updateBall();
             checkBlocksLeft();
+            updateHighscores();
 
             requestAnimationFrame(gameLoop);
         }
