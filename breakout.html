@@ -5,358 +5,200 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Breakout</title>
     <style>
-        body{
+        body {
             margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
         }
         canvas {
             border: 1px solid black;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            display: block;
+            margin: auto;
         }
         #gameover {
             display: none;
+            font-size: 50px;
+            color: red;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 50px;
-            color: red;
         }
-        .top{
+        .top {
+            padding: 10px;
+            background: lightgray;
+        }
+        .right {
             position: absolute;
+            right: 0;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 50px;
-            text-align: center;
-            align-items: center;
-            padding-bottom: 30px;
-        }
-        .right{
-            position: absolute;
-            height: 100%;
-            width: 25%;
-            text-align: center;
-            background-color: rgb(213, 213, 213);
+            width: 200px;
+            background: rgb(213, 213, 213);
+            padding: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container" id="container">
-        <h2 id="gameover">Game Over</h2>
-    </div>  
-    <div class="top">
-        <h1>Breakout</h1>
-    </div>
+    <h1 class="top">Breakout</h1>
+    <h2 id="gameover">Game Over</h2>
     <div class="right">
         <h1 id="score">Score: 0</h1>
-        <div class="highscores">
-            <h2>Highscores</h2>
-            <p>1. name 100p</p>
-            <p>2. name 100p</p>
-            <p>3. name 100p</p>
-        </div>
+        <h2>Highscores</h2>
+        <p>1. Player 100p</p>
+        <p>2. Player 90p</p>
+        <p>3. Player 80p</p>
         <button onclick="resetGame()">Reset</button>
     </div>
-
     <script>
-        let keys = []
-        canvasElem = {
-            x: 0,
-            y: 0,
-            width: 800,
-            height: 800,
-            rows: 4,
-            cols: 8,
-        }
-
-        let score = 0;
-        let gameRunning = true;
-        let items = [];
-
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                gameRunning = false;
-                console.log("Game Paused")
-            } else {
-                gameRunning = true;
-                console.log("Game Resumed");
-                gameLoop(); 
-            }
-        });
-
-
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        document.getElementById("container").appendChild(canvas);
-        canvas.width = canvasElem.width;
-        canvas.height = canvasElem.height;
-    
-        document.addEventListener('keydown', (e) => {
-            keys[e.keyCode] = true;
-        });
+        document.body.appendChild(canvas);
         
-        document.addEventListener('keyup', (e) => {
-            keys[e.keyCode] = false;
-        });
+        const game = {
+            width: 800,
+            height: 600,
+            rows: 5,
+            cols: 8,
+            running: true,
+            score: 0
+        };
 
-        ball = {
-            x: canvasElem.width / 2,
-            y: canvasElem.height / 2,
-            radius: 10,
-            speedX: 0,
-            speedY: 7,
-            color: '#0095DD',
-        }
+        canvas.width = game.width;
+        canvas.height = game.height;
 
-        
-
-        paddle = {
-            x: canvasElem.width / 2 - 50,
-            y: canvasElem.height - 20,
+        const paddle = {
             width: 100,
             height: 10,
+            x: game.width / 2 - 50,
+            y: game.height - 20,
             speed: 10,
-            color: '#0095DD',
-        }   
+            color: '#0095DD'
+        };
 
-        block = {
-            x: 0,
-            y: 0,
-            width: 80,
-            height: 20,
-            color: '#0095DD',
+        const ball = {
+            x: game.width / 2,
+            y: game.height / 2,
+            radius: 10,
+            speedX: 4,
+            speedY: -6,
+            color: '#0095DD'
+        };
+
+        const blocks = [];
+        const blockWidth = 80;
+        const blockHeight = 20;
+
+        function initBlocks() {
+            for (let i = 0; i < game.cols; i++) {
+                blocks[i] = [];
+                for (let j = 0; j < game.rows; j++) {
+                    blocks[i][j] = {
+                        x: i * (blockWidth + 10) + 10,
+                        y: j * (blockHeight + 10) + 10,
+                        width: blockWidth,
+                        height: blockHeight,
+                        color: 'darkblue'
+                    };
+                }
+            }
         }
 
-        
-
-        let blocks = [];
-        
-
-
-        function drawPaddle(){
-            ctx.beginPath();
-            ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-            fillStyle = "red"
-            ctx.fill();
-            ctx.closePath();
+        function drawPaddle() {
+            ctx.fillStyle = paddle.color;
+            ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
         }
 
-        function drawBall(){
+        function drawBall() {
             ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
-            
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
             ctx.fillStyle = ball.color;
             ctx.fill();
             ctx.closePath();
         }
 
-        function drawItems() {
-            for (let i = 0; i < items.length; i++) {
-                ctx.beginPath();
-                ctx.arc(items[i].x, items[i].y, items[i].radius, 0, Math.PI * 2);
-                ctx.fillStyle = items[i].color;
-                ctx.fill();
-                ctx.closePath();
-            }
-        }
-
-
-        function updateItems() {
-            for (let i = 0; i < items.length; i++) {
-                items[i].y += items[i].speedY;
-            }
-            for (let i = 0; i < items.length; i++) {
-
-                if (items[i].x + items[i].radius > paddle.x && items[i].x - items[i].radius < paddle.x + paddle.width && items[i].y + items[i].radius > paddle.y && items[i].y - items[i].radius < paddle.y + paddle.height) {
-                    items.splice(i, 1);
-                    score += 3;
-                    break;
-                }
-            }
-        }
-    
-
-
-    function spawnItem(x, y){
-        if(Math.floor(Math.random()*2) == 0){
-            let item = {
-                x: x+block.width/2,
-                y: y,
-                radius: 7,
-                color: 'yellow',
-                speedY: 2,
-                speedX: 0,
-            }
-            items.push(item);
-        }
-    }
-
-        function initBlocks() {
-            for (var i = 0; i < canvasElem.cols; i++) {
-                blocks[i] = []; 
-                for (var j = 0; j < canvasElem.rows; j++) {
-                    blocks[i][j] = {
-                        x: i * (block.width + 10) + 10,
-                        y: j * (block.height + 10) + 10, 
-                        width: block.width,
-                        height: block.height,
-                        //color: '#' + Math.floor(Math.random() * 16777215).toString(16),
-                        color: 'darkblue',
-                    };
-                }
-            }
-        }
         function drawBlocks() {
-            for (var i = 0; i < canvasElem.cols; i++) {
-                for (var j = 0; j < canvasElem.rows; j++) {
-                    let b = blocks[i][j];
-                    if (b) { 
-                        ctx.beginPath();
-                        ctx.rect(b.x, b.y, b.width, b.height);
-                        ctx.fillStyle = b.color;
-                        ctx.fill();
-                        ctx.closePath();
+            for (let i = 0; i < game.cols; i++) {
+                for (let j = 0; j < game.rows; j++) {
+                    let block = blocks[i][j];
+                    if (block) {
+                        ctx.fillStyle = block.color;
+                        ctx.fillRect(block.x, block.y, block.width, block.height);
                     }
                 }
             }
         }
 
-        function resetGame(){
-            location.reload();
-        }
-
-
-
-
-        function checkKey(){
-            if (keys[37] && paddle.x > 0) {
-                paddle.x -= paddle.speed;
-            }
-            if (keys[39] && paddle.x < canvasElem.width - paddle.width) {
-                paddle.x += paddle.speed;
-            }
+        function checkCollision(ball, obj) {
+            return ball.x + ball.radius > obj.x &&
+                   ball.x - ball.radius < obj.x + obj.width &&
+                   ball.y + ball.radius > obj.y &&
+                   ball.y - ball.radius < obj.y + obj.height;
         }
 
         function updateBall() {
             ball.x += ball.speedX;
             ball.y += ball.speedY;
 
-            if (ball.x + ball.radius > canvasElem.width || ball.x - ball.radius < 0) {
-                ball.speedX = -ball.speedX; 
-            }
-            if (ball.y + ball.radius > canvasElem.height || ball.y - ball.radius < 0) {
-                ball.speedY = -ball.speedY; 
-            }
-            if (ball.x > paddle.x && ball.x < paddle.x + paddle.width && ball.y + ball.radius > paddle.y) {
-                ball.y = paddle.y - ball.radius;
-                let hitPosition = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+            // Wall collisions
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > game.width) ball.speedX *= -1;
+            if (ball.y - ball.radius < 0) ball.speedY *= -1;
 
-                let speed = Math.sqrt(ball.speedX ** 2 + ball.speedY ** 2); 
-                ball.speedX = hitPosition * speed; 
-                ball.speedY = -Math.abs(Math.sqrt(speed ** 2 - ball.speedX ** 2)); 
-            }
-            if(ball.y > paddle.y){
-                document.getElementById("gameover").style.display = "block";
-                ball.radius = 0;
-                ball.speedX = 0;
-                ball.speedY = 0;
-            
+            // Paddle collision
+            if (checkCollision(ball, paddle)) {
+                let offset = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+                ball.speedX = offset * 5;
+                ball.speedY *= -1;
             }
 
-            for (let i = 0; i < canvasElem.cols; i++) {
-                for (let j = 0; j < canvasElem.rows; j++) {
+            // Block collisions
+            for (let i = 0; i < game.cols; i++) {
+                for (let j = 0; j < game.rows; j++) {
                     let block = blocks[i][j];
-                    if (block && isBallCollidingWithBlock(ball, block)) {
-                        
-                        spawnItem(block.x, block.y);
-                        handleBlockCollision(ball, block, i, j);
+                    if (block && checkCollision(ball, block)) {
+                        ball.speedY *= -1;
+                        blocks[i][j] = null;
+                        game.score += 10;
+                        document.getElementById('score').innerText = `Score: ${game.score}`;
+                        return;
                     }
                 }
             }
+
+            // Game Over
+            if (ball.y > game.height) {
+                game.running = false;
+                document.getElementById('gameover').style.display = 'block';
+            }
         }
 
-        function handleBlockCollision(ball, block, i, j) {
-            let collidedFromTopOrBottom = false;
-            let collidedFromLeftOrRight = false;
-
-            
-            let penetrationX = Math.min(
-                Math.abs(ball.x + ball.radius - block.x), 
-                Math.abs(ball.x - ball.radius - (block.x + block.width))
-            );
-            
-            let penetrationY = Math.min(
-                Math.abs(ball.y + ball.radius - block.y), 
-                Math.abs(ball.y - ball.radius - (block.y + block.height))
-            );
-
-            
-            if (
-                ball.x + ball.radius > block.x &&
-                ball.x - ball.radius < block.x + block.width &&
-                ball.y + ball.radius > block.y &&
-                ball.y - ball.radius < block.y + block.height
-            ) {
-            
-                if (penetrationX < penetrationY) {
-                    collidedFromLeftOrRight = true;
-                } else {
-                    collidedFromTopOrBottom = true;
-                }
-            }
-
-            
-            if (collidedFromTopOrBottom) {
-                ball.speedY = -ball.speedY;
-            }
-            if (collidedFromLeftOrRight) {
-                ball.speedX = -ball.speedX;
-            }
-
-            
-            blocks[i].splice(j, 1);
-            console.log("Block hit:", block);
-            score ++;
+        function movePaddle() {
+            if (keys['ArrowLeft'] && paddle.x > 0) paddle.x -= paddle.speed;
+            if (keys['ArrowRight'] && paddle.x < game.width - paddle.width) paddle.x += paddle.speed;
         }
 
-        function isBallCollidingWithBlock(ball, block) {
-            
-            if (ball.x + ball.radius > block.x && 
-                ball.x - ball.radius < block.x + block.width &&
-                ball.y + ball.radius > block.y &&
-                ball.y - ball.radius < block.y + block.height) {
-                return true; 
-            }
-            return false; 
+        let keys = {};
+        document.addEventListener('keydown', (e) => keys[e.key] = true);
+        document.addEventListener('keyup', (e) => keys[e.key] = false);
+
+        function resetGame() {
+            location.reload();
         }
 
-        function updateScore(){
-            document.getElementById("score").innerHTML = "Score: " + score;
-        }
+        function gameLoop() {
+            if (!game.running) return;
 
-
-
-        function gameLoop(){
-            if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            updateBall();
+            drawPaddle();
             drawBall();
             drawBlocks();
-            
-            updateItems();
-            drawItems();
-            checkKey();
-            drawPaddle();
-            updateScore();
+            movePaddle();
+            updateBall();
 
             requestAnimationFrame(gameLoop);
         }
+
         initBlocks();
         gameLoop();
-
     </script>
 </body>
 </html>
