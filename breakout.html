@@ -15,12 +15,21 @@
             display: block;
             margin: auto;
         }
+        #gameoverDiv {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
         #gameover {
             display: none;
             font-size: 50px;
             color: red;
             position: absolute;
-            top: 50%;
+            top: -500%;
             left: 50%;
             transform: translate(-50%, -50%);
         }
@@ -40,21 +49,28 @@
 </head>
 <body>
     <h1 class="top">Breakout</h1>
-    <h2 id="gameover">Game Over</h2>
+    <div id="gameoverDiv">
+        <h2 id="gameover">Game Over</h2>
+        <button onclick="resetGame()" id="resetButton">Reset</button>
+    </div>
+    
     <div class="right">
         <h1 id="score">Score: 0</h1>
         <h2>Highscores</h2>
         <p id="score1">1. Player 100p</p>
         <p id="score2">2. Player 90p</p>
         <p id="score3">3. Player 80p</p>
-        <button onclick="resetGame()">Reset</button>
+        
     </div>
     <script>
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         document.body.appendChild(canvas);
-        let Highscores = [0, 0, 0, 0];
-        let HigscoreNames = ["test", "test2", "test3", "test4"];
+        let Highscores = [
+            { name: "-", score: 0 },
+            { name: "-", score: 0 },
+            { name: "-", score: 0 }
+        ];
         
         const game = {
             width: 800,
@@ -173,9 +189,16 @@
             // Game Over
             if (ball.y > game.height) {
                 game.running = false;
-                Highscores.push(game.score);
+                let playerName = prompt("Game Over! Enter your name:") || "Player"; 
+
+                
+                Highscores.push({ name: playerName, score: game.score });
+
                 updateHighscores();
+
                 document.getElementById('gameover').style.display = 'block';
+                document.getElementById('gameoverDiv').style.display = 'block';
+                document.getElementById("resetButton").style.display = 'block';
             }
         }
 
@@ -189,11 +212,13 @@
         document.addEventListener('keyup', (e) => keys[e.key] = false);
 
         function resetGame() {
+
             game.score = 0;
             game.blockleft = game.rows * game.cols;
             game.running = true;
             document.getElementById('gameover').style.display = 'none';
             document.getElementById('score').innerText = `Score: ${game.score}`;
+            document.getElementById("resetButton").style.display = 'none';
             
             ball.x = game.width / 2;
             ball.y = game.height / 2;
@@ -210,13 +235,12 @@
 
 
         function updateHighscores() {
-            Highscores.sort((a, b) => b - a);
+            Highscores.sort((a, b) => b.score - a.score); 
             Highscores = Highscores.slice(0, 3); 
 
             for (let i = 0; i < Highscores.length; i++) {
-                if (document.getElementById('score' + (i+1))) { 
-                    document.getElementById('score' + (i+1)).innerText = `${i + 1}. Player ${Highscores[i]}p`;
-                }
+                document.getElementById('score' + (i + 1)).innerText = 
+                    `${i + 1}. ${Highscores[i].name} ${Highscores[i].score}p`;
             }
         }
 
