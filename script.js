@@ -49,8 +49,8 @@ const canvas = document.createElement('canvas');
                 blocks[i] = [];
                 for (let j = 0; j < game.rows; j++) {
                     blocks[i][j] = {
-                        x: i * (blockWidth + 10) + 50,
-                        y: j * (blockHeight + 10) + 50,
+                        x: i * (blockWidth + 10) + 45,
+                        y: j * (blockHeight + 10) + 45,
                         width: blockWidth,
                         height: blockHeight,
                         color: 'darkmagenta'
