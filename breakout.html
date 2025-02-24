@@ -139,7 +139,7 @@
         function drawPaddle(){
             ctx.beginPath();
             ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-            fillStyle = paddle.color;
+            fillStyle = "red"
             ctx.fill();
             ctx.closePath();
         }
@@ -203,7 +203,8 @@
                         y: j * (block.height + 10) + 10, 
                         width: block.width,
                         height: block.height,
-                        color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+                        //color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+                        color: 'darkblue',
                     };
                 }
             }
