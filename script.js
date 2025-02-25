@@ -174,6 +174,8 @@ const canvas = document.createElement('canvas');
             ball.y = game.height / 2;
             ball.speedX = -0;
             ball.speedY = -6;
+            keys = {};
+
 
             const sound = new Audio("sounds/coin.wav");
             sound.play();
@@ -181,7 +183,6 @@ const canvas = document.createElement('canvas');
 
             initBlocks();
 
-            
             requestAnimationFrame(gameLoop);
         }
 
