@@ -85,10 +85,7 @@ function drawBlocks() {
 }
 
 function checkCollision(ball, obj) {
-    return ball.x + ball.radius > obj.x &&
-            ball.x - ball.radius < obj.x + obj.width &&
-            ball.y + ball.radius > obj.y &&
-            ball.y - ball.radius < obj.y + obj.height;
+    return ball.x + ball.radius > obj.x && ball.x - ball.radius < obj.x + obj.width && ball.y + ball.radius > obj.y && ball.y - ball.radius < obj.y + obj.height;
 }
 
 function updateBall() {
@@ -153,8 +150,12 @@ function updateBall() {
 }
 
 function movePaddle() {
-    if (keys['ArrowLeft'] && paddle.x > 0) paddle.x -= paddle.speed;
-    if (keys['ArrowRight'] && paddle.x < game.width - paddle.width) paddle.x += paddle.speed;
+    if (keys['ArrowLeft'] && paddle.x > 0) {
+        paddle.x -= paddle.speed;
+    }
+    if (keys['ArrowRight'] && paddle.x < game.width - paddle.width) {
+        paddle.x += paddle.speed;
+    }
 }
 
 let keys = {};
@@ -192,8 +193,7 @@ function updateHighscores() {
     Highscores = Highscores.slice(0, 3); 
 
     for (let i = 0; i < Highscores.length; i++) {
-        document.getElementById('score' + (i + 1)).innerText = 
-            `${i + 1}. ${Highscores[i].name} ${Highscores[i].score}p`;
+        document.getElementById('score' + (i + 1)).innerText = `${i + 1}. ${Highscores[i].name} ${Highscores[i].score}p`;
     }
 }
 
